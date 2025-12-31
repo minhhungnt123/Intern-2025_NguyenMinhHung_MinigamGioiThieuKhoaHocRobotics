@@ -1,5 +1,6 @@
 import pygame
 from config import *
+import os
 
 from menu.main_menu import Menu
 from menu.robot_menu import RobotSelectMenu
@@ -11,9 +12,32 @@ from gameplay.gameplay import Gameplay
 
 
 pygame.init()
+try:
+    pygame.mixer.init()
+except:
+    pass
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Robotics Assembly Game")
 clock = pygame.time.Clock()
+
+bgm_path = os.path.join(PROJECT_ROOT, "Sound", "bgm.mp3")
+
+if os.path.exists(bgm_path):
+    try:
+        # Load nhạc
+        pygame.mixer.music.load(bgm_path)
+        
+        # Chỉnh âm lượng (0.0 đến 1.0) - Đừng để to quá át tiếng hiệu ứng
+        pygame.mixer.music.set_volume(0.5) 
+        
+        # Phát nhạc lặp vô tận (-1 nghĩa là loop forever)
+        pygame.mixer.music.play(-1)
+        
+        print("♫ Đã phát nhạc nền thành công!")
+    except Exception as e:
+        print("⚠ Lỗi khi load nhạc:", e)
+else:
+    print(f"❌ Không tìm thấy file nhạc tại: {bgm_path}")
 
 # ===== STATES =====
 STATE_MAIN_MENU = "main_menu"
