@@ -4,6 +4,9 @@ import os
 import json
 import random
 
+# ⭐ THÊM DÒNG NÀY ĐỂ LẤY BIẾN CÀI ĐẶT ÂM THANH
+from config import SOUND_SETTINGS 
+
 WHITE = (255, 255, 255)
 
 # ===== BASE DIR (QUAN TRỌNG) =====
@@ -190,11 +193,14 @@ class QuizManager:
                 if b["pressed"] and b["hover"] and self.result_time is None:
                     correct = i == self.question["correct_index"]
 
-                    # ===== PLAY SOUND =====
-                    if correct and self.snd_correct:
-                        self.correct_ch.play(self.snd_correct)
-                    elif not correct and self.snd_wrong:
-                        self.wrong_ch.play(self.snd_wrong)
+                    # ===== PLAY SOUND (ĐÃ THÊM LOGIC CHECK SETTING) =====
+                    # Chỉ phát nếu Setting SFX đang BẬT
+                    if SOUND_SETTINGS["sfx_on"]:
+                        if correct and self.snd_correct:
+                            self.correct_ch.play(self.snd_correct)
+                        elif not correct and self.snd_wrong:
+                            self.wrong_ch.play(self.snd_wrong)
+                    # ====================================================
 
                     b["state"] = "correct" if correct else "wrong"
                     if not correct:
@@ -286,11 +292,12 @@ class QuizManager:
             fade.set_alpha(self.fade_alpha)
             fade.fill((0, 0, 0))
             screen.blit(fade, (0, 0))
+            
     # =====================================================
     def load_question_for_robot(self, robot_id, json_path="questions.json"):
         """
         Giữ nguyên UI quiz cũ.
-        Chỉ chuyển đổi dữ liệu từ questions.json mới → format cũ.
+        Chuyển đổi dữ liệu từ questions.json mới → format cũ.
         """
         path = os.path.join(BASE_DIR, json_path)
 
