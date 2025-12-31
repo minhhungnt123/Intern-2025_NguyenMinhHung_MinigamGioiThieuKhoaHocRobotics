@@ -75,7 +75,7 @@ class Gameplay:
             self.quiz.handle_input(event)
             return
 
-        for part in self.parts:
+        for part in reversed(self.parts):
             part.handle_event(event)
 
         if event.type == pygame.MOUSEBUTTONUP:
