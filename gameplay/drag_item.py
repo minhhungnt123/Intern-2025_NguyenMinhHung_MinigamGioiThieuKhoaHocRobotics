@@ -17,10 +17,10 @@ class DragItem:
             
             # 2. --- THÊM DÒNG NÀY ĐỂ SCALE ẢNH ---
             # Chỉnh kích thước về 100x100 (hoặc kích thước bạn muốn)
-            self.image = pygame.transform.smoothscale(raw_image, (100, 100)) 
+            self.image = pygame.transform.smoothscale(raw_image, (200, 200)) 
         else:
             print("❌ Missing part image:", img_path)
-            self.image = pygame.Surface((100, 100)) # Sửa lại size mặc định cho khớp
+            self.image = pygame.Surface((200, 200))
             self.image.fill((255, 0, 0))
 
         # 3. Tạo rect từ ảnh đã scale

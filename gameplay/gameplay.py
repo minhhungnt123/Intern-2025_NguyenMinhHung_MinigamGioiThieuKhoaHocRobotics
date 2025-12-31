@@ -1,5 +1,6 @@
 import pygame
 import json
+import itertools  # <--- Thư viện mới để tạo tổ hợp
 from gameplay.drag_item import DragItem
 from gameplay.assemble_zone import AssembleZone
 from quiz.quiz import QuizManager
@@ -14,7 +15,7 @@ class Gameplay:
         self.robot_key = robot_id.lower()
 
         self.zone = AssembleZone()
-        self.zone.set_state("body", robot_id)   # ⭐ BODY BAN ĐẦU
+        self.zone.set_state("body", robot_id)
 
         self.parts = [
             DragItem("head",  (300, 520), self.robot_folder),
@@ -23,40 +24,62 @@ class Gameplay:
             DragItem("power", (750, 520), self.robot_folder),
         ]
 
-        # --- LOGIC LẮP RÁP MỚI ---
-        # Định nghĩa: (Trạng thái hiện tại, Bộ phận thêm vào) -> Trạng thái mới
-        self.assembly_logic = {
-            ("body", "head"): "head_body",
-            ("head_body", "track"): "head_body_track",
-            ("head_body_track", "arm"): "head_body_track_arm",
-            ("head_body_track", "power"): "head_body_track_power",
-            # Hai trường hợp cuối để hoàn thành robot
-            ("head_body_track_arm", "power"): "robot_1_full_body",
-            ("head_body_track_power", "arm"): "robot_1_full_body"
-        }
+        # ====================================================
+        # ⭐ TỰ ĐỘNG TẠO LOGIC LẮP RÁP (CHO 16 ẢNH)
+        # ====================================================
+        self.assembly_logic = {}
+        
+        # Danh sách các bộ phận (tên phải khớp với DragItem)
+        opt_parts = ["arm", "head", "power", "track"]
+
+        # Hàm tạo tên file ảnh theo quy tắc sắp xếp A-Z
+        def make_state_name(part_list):
+            if len(part_list) == 4:
+                return f"{self.robot_key}_full_body" # Tên đặc biệt cho full
+            if not part_list:
+                return "body"
+            # Sắp xếp a-z để đảm bảo body_arm_head giống body_head_arm
+            return "body_" + "_".join(sorted(part_list))
+
+        # Vòng lặp tạo ra tất cả các trường hợp có thể xảy ra
+        # Duyệt qua số lượng bộ phận từ 0 đến 4
+        for i in range(5): 
+            # Lấy tất cả các tổ hợp (combinations) có i bộ phận
+            for current_combo in itertools.combinations(opt_parts, i):
+                current_state = make_state_name(current_combo)
+                
+                # Với trạng thái hiện tại, thử lắp thêm 1 món chưa có
+                for part in opt_parts:
+                    if part not in current_combo:
+                        # Trạng thái mới = Danh sách cũ + Món mới
+                        new_combo = list(current_combo) + [part]
+                        next_state = make_state_name(new_combo)
+                        
+                        # Thêm vào từ điển logic: (Trạng thái cũ, Món thêm vào) -> Trạng thái mới
+                        self.assembly_logic[(current_state, part)] = next_state
+        
+        # In ra để kiểm tra (bạn có thể xóa dòng này sau)
+        # print(f"Đã tạo {len(self.assembly_logic)} quy tắc lắp ráp!")
+        # ====================================================
 
         self.quiz = QuizManager(SCREEN_WIDTH, SCREEN_HEIGHT)
 
+        # FIX JSON (Giữ nguyên phần fix lỗi trước đó)
         with open("quiz/questions.json", encoding="utf-8") as f:
             raw_data = json.load(f)[self.robot_key]
             
-        # Chuyển đổi key 'answer' -> 'correct_index' để khớp với QuizManager
         self.questions = []
         for q in raw_data:
-            # Tạo dictionary mới đúng chuẩn
             formatted_q = {
                 "question": q["question"],
                 "options": q["options"],
-                "correct_index": q["answer"]  # Đổi tên key ở đây
+                "correct_index": q["answer"]
             }
             self.questions.append(formatted_q)
-        # --------------------
 
         self.pending_part = None
 
-    # -----------------------------------------
     def handle_event(self, event):
-        # Quiz đang mở → chỉ quiz nhận input
         if self.quiz.is_active:
             self.quiz.handle_input(event)
             return
@@ -68,54 +91,45 @@ class Gameplay:
             for part in self.parts:
                 if part.rect.colliderect(self.zone.rect):
                     self.pending_part = part
-                    # Lấy câu hỏi tiếp theo (nếu còn)
-                    if self.questions:
+                    
+                    if len(self.questions) > 0:
                         question = self.questions.pop(0)
                         self.quiz.start_quiz(question)
                     else:
-                        print("Hết câu hỏi!")
-                        # Có thể xử lý logic khi hết câu hỏi ở đây nếu cần
+                        self._try_assemble()
                     break
 
-    # -----------------------------------------
     def update(self):
         result = self.quiz.update()
+        
         if result is not None and self.pending_part:
             if result:
-                # --- SỬA LOGIC CẬP NHẬT TRẠNG THÁI ---
-                current_state = self.zone.current_state
-                part_name = self.pending_part.name
-                
-                # Tìm trạng thái tiếp theo trong từ điển quy tắc
-                next_state = self.assembly_logic.get((current_state, part_name))
-                
-                if next_state:
-                    self.zone.set_state(next_state, self.robot_id)
-                    self.parts.remove(self.pending_part)
-                else:
-                    # Nếu lắp sai thứ tự (VD: chưa có đầu mà đã lắp tay)
-                    print(f"⚠️ Lắp sai thứ tự! Không thể gắn '{part_name}' vào '{current_state}'")
-                    self.pending_part.reset()
-                    self.zone.wrong_animation()
-                # -------------------------------------
+                self._try_assemble()
             else:
-                # Trả lời sai -> Reset vị trí mảnh ghép
                 self.pending_part.reset()
                 self.zone.wrong_animation()
-
+            
             self.pending_part = None
 
-    # -----------------------------------------
+    def _try_assemble(self):
+        current_state = self.zone.current_state
+        part_name = self.pending_part.name
+        
+        # Tra từ điển (đã được tạo tự động ở trên)
+        next_state = self.assembly_logic.get((current_state, part_name))
+        
+        if next_state:
+            self.zone.set_state(next_state, self.robot_id)
+            self.parts.remove(self.pending_part)
+        else:
+            # Trường hợp này hiếm khi xảy ra nếu bạn vẽ đủ 16 ảnh
+            print(f"⚠️ Không tìm thấy ảnh cho: {current_state} + {part_name}")
+            self.pending_part.reset()
+            self.zone.wrong_animation()
+
     def draw(self):
-        # 1. Blueprint nền
         self.blueprint_bg.draw(self.screen)
-
-        # 2. Robot lắp ráp
         self.zone.draw(self.screen)
-
-        # 3. Parts
         for part in self.parts:
             part.draw(self.screen)
-
-        # 4. Quiz
         self.quiz.draw(self.screen)
