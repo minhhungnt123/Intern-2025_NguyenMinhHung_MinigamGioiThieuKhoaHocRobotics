@@ -1,116 +1,138 @@
 import pygame
 import os
-import math
 from config import *
 
 class FinishMenu:
     def __init__(self, screen):
         self.screen = screen
         self.is_active = False
-        self.start_time = 0
-        self.show_buttons = False
         
-        # --- 1. LOAD ASSETS ---
-        # Ảnh chúc mừng
-        congrats_path = os.path.join(PROJECT_ROOT, "Images", "Menu", "congratulation.png")
-        if os.path.exists(congrats_path):
-            raw_img = pygame.image.load(congrats_path).convert_alpha()
-            
-            # Chỉnh kích thước ảnh gốc
-            target_width = 600  
-            scale_factor = target_width / raw_img.get_width()
-            target_height = int(raw_img.get_height() * scale_factor)
-            
-            self.congrats_img = pygame.transform.smoothscale(raw_img, (target_width, target_height))
-        else:
-            font = pygame.font.SysFont("Arial", 60, bold=True)
-            self.congrats_img = font.render("CONGRATULATIONS!", True, (255, 215, 0))
-
-        # Âm thanh chiến thắng
-        self.win_sound = None
-        self.sound_duration = 2000 
-        sound_path = os.path.join(PROJECT_ROOT, "Sound", "winning.mp3")
-        if os.path.exists(sound_path):
-            try:
-                self.win_sound = pygame.mixer.Sound(sound_path)
-                self.sound_duration = self.win_sound.get_length() * 1000
-            except: pass
-
-        # --- 2. LOAD NÚT BẤM (THAY ĐỔI VỊ TRÍ DỌC) ---
-        # Nút Restart: Nằm ở trên (cách tâm 80px xuống dưới)
-        self.btn_restart_img, self.btn_restart_rect = self._load_button("restart_button.png", 0, 50)
+        # --- TRẠNG THÁI ANIMATION ---
+        # 0: Mới hiện (đứng im giữa màn hình)
+        # 1: Đang trượt sang trái
+        # 2: Đã trượt xong & Hiện menu nút
+        self.anim_phase = 0
+        self.slide_speed = 15  # Tốc độ trượt
         
-        # Nút Home: Nằm ở dưới (cách tâm 180px xuống dưới -> cách nút trên 100px)
-        self.btn_home_img, self.btn_home_rect = self._load_button("home.png", 0, 180)
+        # --- LOAD HÌNH ẢNH ---
+        self._load_assets()
 
-        # Màn hình đen mờ
-        self.dim_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
-        self.dim_surface.set_alpha(150) 
-        self.dim_surface.fill((0, 0, 0))
-
-    def _load_button(self, filename, x_offset, y_offset):
-        """Hàm hỗ trợ load ảnh nút bấm với tọa độ X, Y tùy chỉnh"""
-        path = os.path.join(PROJECT_ROOT, "Images", "Menu", filename)
-        cx, cy = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
+        # --- CẤU HÌNH VỊ TRÍ ---
+        # Vị trí ban đầu (Giữa màn hình)
+        self.center_x = SCREEN_WIDTH // 2
+        self.center_y = SCREEN_HEIGHT // 2
         
+        # Vị trí đích sau khi trượt (Lệch sang trái)
+        self.target_x = 350 
+        
+        # Rect của hình chúc mừng
+        self.congrat_rect = self.congrat_img.get_rect(center=(self.center_x, self.center_y))
+
+        # --- DANH SÁCH NÚT ---
+        # Gồm: Level 1, Level 2, Level 3, Restart, Home
+        # Level buttons sẽ tượng trưng cho Robot 1, 2, 3
+        self.buttons = []
+        self._init_buttons()
+
+    def _load_assets(self):
+        # 1. Hình nền mờ
+        self.overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.overlay.set_alpha(180) # Độ mờ
+        self.overlay.fill((0, 0, 0))
+
+        # 2. Hình Congratulation
+        path = os.path.join(PROJECT_ROOT, "Images", "Menu", "congratulation.png")
         if os.path.exists(path):
             img = pygame.image.load(path).convert_alpha()
-            img = pygame.transform.smoothscale(img, (280, 140)) # Resize
+            # Scale to khoảng 60% màn hình để còn chỗ cho nút
+            self.congrat_img = pygame.transform.smoothscale(img, (600, 450)) 
         else:
-            img = pygame.Surface((280, 140))
-            img.fill((200, 200, 200))
-        
-        # Tạo rect tại vị trí trung tâm + offset
-        rect = img.get_rect(center=(cx + x_offset, cy + y_offset))
-        return img, rect
+            self.congrat_img = pygame.Surface((600, 450))
+            self.congrat_img.fill((255, 215, 0))
+
+    def _init_buttons(self):
+        # Khu vực bên phải để đặt nút (từ x=700 trở đi)
+        start_x = 850
+        start_y = 200
+        gap_y = 100 # Khoảng cách giữa các nút
+
+        # Helper load ảnh nút
+        def make_btn(name, x, y, tag, scale=(180, 70)):
+            path = os.path.join(PROJECT_ROOT, "Images", "Menu", name)
+            if os.path.exists(path):
+                img = pygame.image.load(path).convert_alpha()
+                img = pygame.transform.smoothscale(img, scale)
+            else:
+                img = pygame.Surface(scale)
+                img.fill((200, 200, 200))
+            
+            rect = img.get_rect(center=(x, y))
+            return {"image": img, "rect": rect, "tag": tag}
+
+        # Tạo 3 nút Level (Tương ứng Robot 1, 2, 3)
+        self.buttons = [
+            make_btn("level1.png", start_x, start_y, "robot_1"),
+            make_btn("level2.png", start_x, start_y + gap_y, "robot_2"),
+            make_btn("level3.png", start_x, start_y + gap_y * 2, "robot_3"),
+        ]
+
+        # Tạo 2 nút chức năng nhỏ hơn ở dưới cùng (Restart, Home)
+        btn_func_y = start_y + gap_y * 3 + 20
+        self.buttons.append(make_btn("restart_button.png", start_x - 80, btn_func_y, "restart", (180, 70)))
+        self.buttons.append(make_btn("home.png", start_x + 80, btn_func_y, "home", (180, 70)))
 
     def show(self):
-        if not self.is_active:
-            self.is_active = True
-            self.show_buttons = False
-            self.start_time = pygame.time.get_ticks()
-            if self.win_sound:
-                self.win_sound.play()
+        self.is_active = True
+        self.anim_phase = 0
+        # Reset vị trí về giữa
+        self.congrat_rect.center = (self.center_x, self.center_y)
+        
+        # Play sound victory nếu có
+        win_sound = os.path.join(PROJECT_ROOT, "Sound", "winning.mp3")
+        if os.path.exists(win_sound) and SOUND_SETTINGS["sfx_on"]:
+            pygame.mixer.Sound(win_sound).play()
 
     def update(self):
         if not self.is_active: return
 
-        if not self.show_buttons:
-            elapsed = pygame.time.get_ticks() - self.start_time
-            if elapsed > self.sound_duration:
-                self.show_buttons = True
+        # LOGIC ANIMATION
+        if self.anim_phase == 0:
+            # Chờ 1 chút (khoảng 60 frame ~ 1 giây) rồi mới trượt
+            # Ở đây mình làm đơn giản: cho trượt luôn hoặc chờ user click
+            # Để tự động trượt:
+            self.anim_phase = 1
+
+        elif self.anim_phase == 1:
+            # Di chuyển sang trái
+            if self.congrat_rect.centerx > self.target_x:
+                self.congrat_rect.centerx -= self.slide_speed
+            else:
+                # Đã đến đích -> Hiện nút
+                self.congrat_rect.centerx = self.target_x
+                self.anim_phase = 2
+
+    def handle_event(self, event):
+        if not self.is_active: return None
+        
+        # Chỉ xử lý click khi animation đã xong (Phase 2)
+        if self.anim_phase == 2:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    for btn in self.buttons:
+                        if btn["rect"].collidepoint(event.pos):
+                            return btn["tag"] # Trả về: "robot_1", "restart", "home"...
+        return None
 
     def draw(self):
         if not self.is_active: return
 
-        elapsed = pygame.time.get_ticks() - self.start_time
-        scale = min(1.0, elapsed / 500) 
-        scale = 1 + (2.70158 + 1) * pow(scale - 1, 3) + 2.70158 * pow(scale - 1, 2)
-        if elapsed > 500: scale = 1.0
+        # 1. Vẽ nền tối
+        self.screen.blit(self.overlay, (0, 0))
 
-        orig_w, orig_h = self.congrats_img.get_size()
-        new_w = int(orig_w * scale)
-        new_h = int(orig_h * scale)
-        scaled_img = pygame.transform.smoothscale(self.congrats_img, (new_w, new_h))
-        
-        # Đẩy ảnh Congratulation lên cao hơn một chút (-100px) để không che nút
-        img_rect = scaled_img.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
+        # 2. Vẽ hình Congratulation (Vị trí cập nhật theo update)
+        self.screen.blit(self.congrat_img, self.congrat_rect)
 
-        if self.show_buttons:
-            self.screen.blit(self.dim_surface, (0, 0))
-
-        self.screen.blit(scaled_img, img_rect)
-
-        if self.show_buttons:
-            self.screen.blit(self.btn_restart_img, self.btn_restart_rect)
-            self.screen.blit(self.btn_home_img, self.btn_home_rect)
-
-    def handle_event(self, event):
-        if not self.is_active or not self.show_buttons: return None
-
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            if self.btn_restart_rect.collidepoint(event.pos):
-                return "restart"
-            if self.btn_home_rect.collidepoint(event.pos):
-                return "home"
-        return None
+        # 3. Vẽ các nút (Chỉ vẽ khi Phase == 2)
+        if self.anim_phase == 2:
+            for btn in self.buttons:
+                self.screen.blit(btn["image"], btn["rect"])

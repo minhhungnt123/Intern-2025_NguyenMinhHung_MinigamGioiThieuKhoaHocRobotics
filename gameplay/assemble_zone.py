@@ -16,8 +16,11 @@ class AssembleZone:
     def set_state(self, new_state, robot_id):
         self.current_state = new_state
         self.robot_id = robot_id
-
-        # Đường dẫn ảnh: Images/Robot_1/head_body.png, v.v.
+        ROBOT_SIZES = {
+            "robot_1": (450, 450),
+            "robot_2": (480, 480),
+            "default": (260, 260) 
+        }
         img_path = os.path.join(
             PROJECT_ROOT,
             "Images",
@@ -27,13 +30,10 @@ class AssembleZone:
 
         if os.path.exists(img_path):
             raw_img = pygame.image.load(img_path).convert_alpha()
+            target_size = ROBOT_SIZES.get(robot_id, ROBOT_SIZES["default"])
+            self.image = pygame.transform.smoothscale(raw_img, target_size)
+            self.rect = self.image.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
             
-            # --- FIX: SCALE ẢNH ĐỂ KHÔNG BỊ TRÀN MÀN HÌNH ---
-            # Tùy chỉnh kích thước hiển thị mong muốn (ví dụ 260x260)
-            self.image = pygame.transform.smoothscale(
-                raw_img, 
-                (260, 260) 
-            )
         else:
             print(f"❌ Thiếu ảnh trạng thái: {img_path}")
             self.image = None

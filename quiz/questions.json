@@ -1,83 +1,78 @@
 {
   "robot_1": [
     {
-      "question": "Bluetooth dùng để...",
-      "options": ["Kết nối không dây", "Nấu nướng", "Làm lạnh", "Cắt giấy"],
+      "question": "Robot ăn gì để sống?",
+      "options": ["Cơm", "Pin / Điện", "Kẹo", "Nước ngọt"],
+      "answer": 1
+    },
+    {
+      "question": "Robot suy nghĩ bằng gì?",
+      "options": ["Máy tính", "Cái bụng", "Cái mũ", "Đầu gối"],
       "answer": 0
     },
     {
-      "question": "Lập trình robot là...",
-      "options": ["Viết lệnh điều khiển", "Vẽ tranh", "Hát", "Chơi thể thao"],
+      "question": "Ai tạo ra Robot?",
+      "options": ["Ông Bụt", "Người ngoài hành tinh", "Con người", "Siêu nhân"],
+      "answer": 2
+    },
+    {
+      "question": "Robot giúp chúng ta làm gì?",
+      "options": ["Làm việc", "Ăn vặt", "Ngủ nướng", "Khóc nhè"],
       "answer": 0
     },
     {
-      "question": "AI là viết tắt của...",
-      "options": ["Trí tuệ nhân tạo", "Áo in", "Anh yêu", "Âm ỉ"],
-      "answer": 0
-    },
-    {
-      "question": "Camera robot dùng để...",
-      "options": ["Nhìn/Xử lý ảnh", "Nghe nhạc", "Ngửi mùi", "Nếm vị"],
-      "answer": 0
-    },
-    {
-      "question": "Robot hút bụi là loại robot...",
-      "options": ["Dịch vụ gia đình", "Chiến đấu", "Y tế", "Vũ trụ"],
-      "answer": 0
+      "question": "Muốn Robot nghe lời phải làm gì?",
+      "options": ["Năn nỉ", "Lập trình", "Dọa nạt", "Cho tiền"],
+      "answer": 1
     }
   ],
   "robot_2": [
     {
-      "question": "Đèn LED dùng để...",
-      "options": ["Báo hiệu", "Quạt mát", "Chạy", "Nghe"],
+      "question": "Mắt của Robot là gì?",
+      "options": ["Camera", "Kính râm", "Đèn pin", "Gương"],
       "answer": 0
     },
     {
-      "question": "Delay(1000) là bao lâu?",
-      "options": ["100ms", "1 giây", "10 giây", "1 phút"],
+      "question": "Robot đi bằng gì?",
+      "options": ["Cánh gà", "Bánh xe", "Giày trượt", "Gậy"],
       "answer": 1
     },
     {
-      "question": "Cảm biến siêu âm đo gì?",
-      "options": ["Nhiệt độ", "Khoảng cách", "Ánh sáng", "Âm thanh"],
+      "question": "Robot sợ nhất cái gì?",
+      "options": ["Bóng tối", "Nước", "Ma", "Đi học"],
       "answer": 1
     },
     {
-      "question": "Động cơ Servo có thể...",
-      "options": ["Xoay góc chính xác", "Chỉ quay tròn", "Phát sáng", "Nấu ăn"],
+      "question": "Robot có biết mệt không?",
+      "options": ["Có", "Chỉ hết pin", "Hay buồn ngủ", "Hay đói"],
+      "answer": 1
+    },
+    {
+      "question": "Tay Robot dùng để làm gì?",
+      "options": ["Gắp đồ", "Gãi lưng", "Múa", "Che nắng"],
       "answer": 0
-    },
-    {
-      "question": "Nguồn điện an toàn cho trẻ là...",
-      "options": ["220V", "Pin tiểu (AA)", "Điện cao thế", "Sấm sét"],
-      "answer": 1
     }
   ],
   "robot_3": [
     {
-      "question": "Robot là gì?",
-      "options": ["Đồ ăn", "Máy tự động", "Cây cối", "Thú cưng"],
+      "question": "Robot thám hiểm đi đâu?",
+      "options": ["Đi chợ", "Sao Hỏa", "Công viên", "Đi ngủ"],
       "answer": 1
     },
     {
-      "question": "Pin dùng để làm gì?",
-      "options": ["Cung cấp năng lượng", "Trang trí", "Làm mát", "Phát nhạc"],
+      "question": "Muốn chế tạo Robot cần gì?",
+      "options": ["Nhiều tiền", "Sáng tạo", "Cơ bắp", "Đẹp trai"],
+      "answer": 1
+    },
+    {
+      "question": "Robot hút bụi giúp ai?",
+      "options": ["Giúp mèo", "Giúp Mẹ", "Giúp cây", "Tự chơi"],
+      "answer": 1
+    },
+    {
+      "question": "Bé có thể làm Robot không?",
+      "options": ["Chắc chắn CÓ", "Không thể", "Khó lắm", "Chịu thua"],
       "answer": 0
-    },
-    {
-      "question": "Bánh xe giúp robot...",
-      "options": ["Bay", "Di chuyển", "Bơi", "Ngủ"],
-      "answer": 1
-    },
-    {
-      "question": "Cảm biến giúp robot...",
-      "options": ["Nhận biết môi trường", "Chạy nhanh", "Đẹp hơn", "Tàng hình"],
-      "answer": 0
-    },
-    {
-      "question": "Bộ não của robot là...",
-      "options": ["Động cơ", "Mạch điều khiển", "Bánh xe", "Vỏ nhựa"],
-      "answer": 1
     }
   ]
 }

@@ -28,11 +28,8 @@ if os.path.exists(bgm_path):
     try:
         pygame.mixer.music.load(bgm_path)
         pygame.mixer.music.set_volume(0.5) 
-        
-        # Chỉ phát nhạc nếu trong Config đang bật (mặc định True)
         if SOUND_SETTINGS["bgm_on"]:
-            pygame.mixer.music.play(-1) # Loop vô hạn
-            
+            pygame.mixer.music.play(-1)
         print("♫ Đã load nhạc nền thành công!")
     except Exception as e:
         print("⚠ Lỗi khi load nhạc:", e)
@@ -63,61 +60,63 @@ while running:
     clock.tick(FPS)
 
     # ================= EVENT HANDLING =================
-    for event in pygame.event.get():
+    # Chỉ gọi pygame.event.get() MỘT LẦN duy nhất ở đây
+    events = pygame.event.get() 
+    for event in events:
         if event.type == pygame.QUIT:
             running = False
 
         # --- 1. MAIN MENU EVENTS ---
         if state == STATE_MAIN_MENU:
             action = main_menu.handle_event(event)
-            
-            # Xử lý bật/tắt nhạc từ Setting Menu
             if action == "toggle_bgm":
                 if SOUND_SETTINGS["bgm_on"]:
-                    if not pygame.mixer.music.get_busy():
-                        pygame.mixer.music.play(-1)
-                    else:
-                        pygame.mixer.music.unpause()
+                    if not pygame.mixer.music.get_busy(): pygame.mixer.music.play(-1)
+                    else: pygame.mixer.music.unpause()
                 else:
                     pygame.mixer.music.stop()
 
         # --- 2. ROBOT MENU EVENTS ---
         elif state == STATE_ROBOT_MENU:
             action = robot_menu.handle_event(event)
-            
-            # Nút Back (Home Icon) quay về menu chính
             if action == "back":
                 state = STATE_MAIN_MENU
-                main_menu.state = "INTRO" # Reset hiệu ứng fade
+                main_menu.state = "INTRO"
                 main_menu.alpha = 0
 
         # --- 3. GAMEPLAY EVENTS ---
         elif state == STATE_GAME:
+            # Gameplay xử lý event và trả về action
             action = gameplay.handle_event(event)
             
-            # Nút Restart (chơi lại màn hiện tại)
+            # --- CÁC TRƯỜNG HỢP XỬ LÝ ---
+            
+            # 1. Chơi lại (Restart)
             if action == "restart":
                 print("🔄 Restarting Level...")
                 gameplay = Gameplay(screen, selected_robot, design_plan)
                 
-            # Nút Home (quay về menu chính)
+            # 2. Về trang chủ (Home)
             elif action == "home":
                 print("🏠 Going Home...")
                 state = STATE_MAIN_MENU
                 main_menu.state = "INTRO"
                 main_menu.alpha = 0
-                
-                # Reset nhạc nền nếu đang bị hiệu ứng game đè (tùy chọn)
                 if SOUND_SETTINGS["bgm_on"] and not pygame.mixer.music.get_busy():
                     pygame.mixer.music.play(-1)
 
+            # 3. MỚI: Chuyển robot từ Menu Chiến Thắng
+            elif action in ["robot_1", "robot_2", "robot_3"]:
+                print(f"🚀 Switching to {action}...")
+                selected_robot = action # Cập nhật robot mới
+                # Khởi tạo lại game với robot mới (giữ nguyên nền design_plan cũ)
+                gameplay = Gameplay(screen, selected_robot, design_plan)
+
+
     # ================= DRAW BACKGROUND =================
-    # Vẽ nền bàn gỗ cho các menu
     if state in (STATE_MAIN_MENU, STATE_ROBOT_MENU):
         table_bg.update()
         table_bg.draw(screen)
-
-    # Vẽ nền bàn gỗ tĩnh phía sau bản vẽ thiết kế
     elif state == STATE_DESIGN_PLAN:
         table_bg.draw(screen)
 
@@ -127,21 +126,17 @@ while running:
     if state == STATE_MAIN_MENU:
         result = main_menu.update()
         main_menu.draw()
-
         if result == "START_GAME":
             state = STATE_ROBOT_MENU
-            robot_menu.selected_robot = None # Reset lựa chọn cũ
+            robot_menu.selected_robot = None
 
     # --- 2. ROBOT SELECT MENU ---
     elif state == STATE_ROBOT_MENU:
         robot_menu.update()
         robot_menu.draw()
-
-        # Kiểm tra xem người chơi đã chọn robot chưa
         result = robot_menu.get_selected_robot()
         if result:
             selected_robot = result
-            # Chuyển sang màn hình xem bản vẽ
             design_plan = DesignPlanBackground()
             state = STATE_DESIGN_PLAN
 
@@ -149,8 +144,6 @@ while running:
     elif state == STATE_DESIGN_PLAN:
         design_plan.update()
         design_plan.draw(screen)
-
-        # Khi xem xong bản vẽ -> Vào game chính
         if design_plan.done:
             gameplay = Gameplay(screen, selected_robot, design_plan)
             state = STATE_GAME

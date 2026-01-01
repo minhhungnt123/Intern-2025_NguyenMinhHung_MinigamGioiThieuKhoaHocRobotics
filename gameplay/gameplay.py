@@ -72,10 +72,10 @@ class Gameplay:
         pause_path = os.path.join(PROJECT_ROOT, "Images", "Menu", "pause_button.png")
         if os.path.exists(pause_path):
             img = pygame.image.load(pause_path).convert_alpha()
-            self.pause_img = pygame.transform.smoothscale(img, (60, 60))
+            self.pause_img = pygame.transform.smoothscale(img, (100, 60))
         else:
-            self.pause_img = pygame.Surface((60, 60)); self.pause_img.fill((255, 50, 50))
-        
+            self.pause_img = pygame.Surface((100, 70)); self.pause_img.fill((255, 50, 50))
+
         # Vị trí nút Pause (Góc trên phải)
         self.pause_rect = self.pause_img.get_rect(topright=(SCREEN_WIDTH - 20, 20))
 
@@ -99,14 +99,15 @@ class Gameplay:
             path = os.path.join(PROJECT_ROOT, "Images", "Menu", name)
             if os.path.exists(path):
                 img = pygame.image.load(path).convert_alpha()
-                img = pygame.transform.smoothscale(img, (80, 80))
+                img = pygame.transform.smoothscale(img, (150, 80))
             else:
                 img = pygame.Surface((80, 80)); img.fill((0, 200, 0))
             rect = img.get_rect(center=pos)
             return img, rect
 
-        self.btn_restart_img, self.btn_restart_rect = load_btn("restart_button.png", (cx - 60, cy))
-        self.btn_home_img, self.btn_home_rect = load_btn("home.png", (cx + 60, cy))
+        self.btn_restart_img, self.btn_restart_rect = load_btn("restart_button.png", (cx - 150, cy))
+        self.btn_play_img, self.btn_play_rect = load_btn("play_button.png", (cx, cy))
+        self.btn_home_img, self.btn_home_rect = load_btn("home.png", (cx + 150, cy))
         
         self.dim_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
         self.dim_surface.set_alpha(150)
@@ -124,7 +125,7 @@ class Gameplay:
         RUN_FILES = {
             "robot_1": {"folder": "Robot_1", "file": "robot_1_run.png", "scale": (300, 300), "frames": 10},
             "robot_2": {"folder": "Robot_2", "file": "robot_2_run.png", "scale": (280, 320), "frames": 9},
-            "robot_3": {"folder": "Robot_3", "file": "robot_3_run.png", "scale": (200, 200), "frames": 4},
+            "robot_3": {"folder": "Robot_3", "file": "robot_3_run.png", "scale": (300, 300), "frames": 4},
         }
         ROBOT_SCALES = {
             "robot_1": 3.0,
@@ -137,7 +138,7 @@ class Gameplay:
         # ==========================================
         
         # 1. Cấu hình khoảng cách
-        SIDEBAR_RIGHT_MARGIN = 140
+        SIDEBAR_RIGHT_MARGIN = 180
         SIDEBAR_START_Y = 120        
         ITEM_SPACING_Y = 150         
 
@@ -194,7 +195,8 @@ class Gameplay:
                 "options": q["options"],
                 "correct_index": q["answer"]
             })
-
+        
+        self.backup_questions = list(self.questions)
         self.pending_part = None
 
         # Animation Run
@@ -217,7 +219,8 @@ class Gameplay:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if self.btn_restart_rect.collidepoint(event.pos): return "restart"
                 if self.btn_home_rect.collidepoint(event.pos): return "home"
-                if self.pause_rect.collidepoint(event.pos): self.is_paused = False
+                if self.btn_play_rect.collidepoint(event.pos): 
+                    self.is_paused = False
             return None 
 
         if self.is_victory_run: return None
@@ -238,8 +241,12 @@ class Gameplay:
             for part in self.parts:
                 if part.rect.colliderect(self.zone.rect):
                     self.pending_part = part
+                    if len(self.questions) == 0:
+                        # Nếu hết câu hỏi, lấy lại từ bản backup
+                        self.questions = list(self.backup_questions)
+
                     if len(self.questions) > 0:
-                        self.quiz.start_quiz(self.questions.pop(0))
+                        self.quiz.start_quiz(self.questions[0])
                     else:
                         self._try_assemble()
                     break
@@ -262,10 +269,18 @@ class Gameplay:
 
         result = self.quiz.update()
         if result is not None and self.pending_part:
-            if result: self._try_assemble()
+            if result: 
+                self._try_assemble()
+                if len(self.questions) > 0:
+                    self.questions.pop(0)
             else:
                 self.pending_part.reset()
                 self.zone.wrong_animation()
+                
+                if len(self.questions) > 0:
+                    current_q = self.questions.pop(0)
+                    self.questions.append(current_q)
+                    
             self.pending_part = None
         
         if not self.parts and not self.pending_part and not self.quiz.is_active:
@@ -287,41 +302,48 @@ class Gameplay:
             self.zone.wrong_animation()
 
     def draw(self):
+        # 1. Vẽ nền
         self.blueprint_bg.draw(self.screen)
         
         if self.is_victory_run:
             run_img = self.run_anim.get_image()
             self.screen.blit(run_img, (self.run_pos_x, self.run_pos_y))
         else:
+            # 2. Vẽ vùng lắp ráp
             self.zone.draw(self.screen)
 
-            # Vẽ card nền cho các bộ phận (Inventory)
+            # 3. Vẽ card nền cho các bộ phận
             for pos in self.part_start_positions:
                 card_rect = self.part_card_img.get_rect(center=pos)
                 self.screen.blit(self.part_card_img, card_rect)
 
+            # 4. Vẽ các bộ phận
             for part in self.parts:
                 part.draw(self.screen)
-            
-            self.quiz.draw(self.screen)
-
-            # UI: Thẻ Robot Mẫu (Góc Trái)
             preview_card_rect = self.preview_card_img.get_rect(topleft=(20, 20))
             self.screen.blit(self.preview_card_img, preview_card_rect)
             
             prev_rect = self.preview_img.get_rect(center=preview_card_rect.center)
             prev_rect.y -= 10 
             self.screen.blit(self.preview_img, prev_rect)
-            
-            # UI: Nút Pause (Góc Phải)
-            self.screen.blit(self.pause_img, self.pause_rect)
 
+            # UI: Nút Pause
+            self.screen.blit(self.pause_img, self.pause_rect)
+            # -----------------------------------------------------------
+
+            # 5. Vẽ Quiz
+            self.quiz.draw(self.screen)
+
+
+        # 6. Vẽ Menu Pause
         if self.is_paused:
             self.screen.blit(self.dim_surface, (0, 0))
             font_pause = pygame.font.SysFont("Arial", 50, bold=True)
             txt_pause = font_pause.render("PAUSED", True, (255, 255, 255))
-            self.screen.blit(txt_pause, txt_pause.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2 - 100)))
+            self.screen.blit(txt_pause, txt_pause.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2 - 120)))
+            
             self.screen.blit(self.btn_restart_img, self.btn_restart_rect)
+            self.screen.blit(self.btn_play_img, self.btn_play_rect) 
             self.screen.blit(self.btn_home_img, self.btn_home_rect)
 
         self.finish_menu.draw()
