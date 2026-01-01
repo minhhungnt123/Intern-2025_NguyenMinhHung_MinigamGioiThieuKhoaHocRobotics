@@ -45,7 +45,7 @@ class DragItem:
         self.image = pygame.transform.smoothscale(raw_image, scale)
 
         # ---- Rect & Mask (Pixel Perfect) ----
-        self.rect = self.image.get_bounding_rect()
+        self.rect = self.image.get_rect()
         self.rect.topleft = pos
         self.mask = pygame.mask.from_surface(self.image)
 

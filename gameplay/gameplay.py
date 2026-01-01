@@ -15,32 +15,58 @@ class Gameplay:
         self.robot_id = robot_id
         self.blueprint_bg = blueprint_bg
         self.robot_key = robot_id.lower()
+        self.finish_menu = FinishMenu(screen) # Giữ nguyên code menu của bạn
 
-        # --- KHỞI TẠO FINISH MENU ---
-        self.finish_menu = FinishMenu(screen)
-        # ----------------------------
+        # ====================================================
+        # ⭐ 1. CẤU HÌNH CÁC BỘ PHẬN CHO TỪNG ROBOT
+        # ====================================================
+        # Định nghĩa xem mỗi robot có những bộ phận rời nào
+        ROBOT_CONFIGS = {
+            "robot_1": ["head", "track"],                   # Level 1: 2 món (+ body = 3)
+            "robot_2": ["head", "law", "engine"],            # Level 2: 3 món (+ body = 4)
+            "robot_3": ["head", "track", "arm", "power"],   # Level 3: 4 món (+ body = 5)
+        }
+        
+        # Lấy danh sách bộ phận dựa trên ID, mặc định là full nếu không tìm thấy
+        opt_parts = ROBOT_CONFIGS.get(self.robot_key, ["head", "track", "arm", "power"])
+        
+        # ====================================================
+        # ⭐ 2. TẠO DRAG ITEM TỰ ĐỘNG DỰA TRÊN DANH SÁCH
+        # ====================================================
+        self.parts = []
+        
+        # Định nghĩa vị trí cố định trên bàn cho từng loại bộ phận (để nó không chồng lên nhau)
+        # Bạn có thể chỉnh lại toạ độ x, y cho đẹp
+        POSITIONS = {
+            "head":  (300, 520),
+            "track": (450, 520),
+            "arm":   (600, 520),
+            "power": (750, 520)
+        }
+
+        for part_name in opt_parts:
+            # Lấy vị trí từ điển, nếu không có thì để mặc định (0,0)
+            pos = POSITIONS.get(part_name, (100, 100)) 
+            self.parts.append(DragItem(part_name, pos, self.robot_id))
 
         self.zone = AssembleZone()
         self.zone.set_state("body", robot_id)
 
-        self.parts = [
-            DragItem("head",  (300, 520), self.robot_id),
-            DragItem("track", (450, 520), self.robot_id),
-            DragItem("arm",   (600, 520), self.robot_id),
-            DragItem("power", (750, 520), self.robot_id),
-        ]
-
-        # Logic lắp ráp (Tự động tạo tổ hợp)
+        # ====================================================
+        # ⭐ 3. LOGIC LẮP RÁP (TỰ ĐỘNG SINH RA THEO SỐ LƯỢNG BỘ PHẬN)
+        # ====================================================
         self.assembly_logic = {}
-        opt_parts = ["arm", "head", "power", "track"]
+        
         def make_state_name(part_list):
-            if len(part_list) == 4:
+            # Nếu số lượng bộ phận đã lắp = tổng số bộ phận cần thiết
+            if len(part_list) == len(opt_parts):
                 return f"{self.robot_key}_full_body"
             if not part_list:
                 return "body"
             return "body_" + "_".join(sorted(part_list))
 
-        for i in range(5): 
+        # Vòng lặp này tự động chạy đúng bất kể có bao nhiêu bộ phận (2, 3 hay 4)
+        for i in range(len(opt_parts) + 1): 
             for current_combo in itertools.combinations(opt_parts, i):
                 current_state = make_state_name(current_combo)
                 for part in opt_parts:

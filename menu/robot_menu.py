@@ -39,14 +39,12 @@ class RobotSelectMenu:
             {
                 "id": "robot_2", 
                 "level_img": "level2.png", 
-                # Dùng tạm robot 1 nếu chưa có hình robot 2
-                "robot_img": "robot_1_full_body.png", 
+                "robot_img": "robot_2_full_body.png", 
             },
             {
                 "id": "robot_3", 
                 "level_img": "level3.png", 
-                # Dùng tạm robot 1 nếu chưa có hình robot 3
-                "robot_img": "robot_1_full_body.png", 
+                "robot_img": "robot_3_full_body.png", 
             },
         ]
 
@@ -76,7 +74,6 @@ class RobotSelectMenu:
             # Ưu tiên lấy trong thư mục Menu trước (như file bạn upload)
             robo_path = os.path.join(PROJECT_ROOT, "Images", "Menu", item["robot_img"])
             if not os.path.exists(robo_path):
-                # Nếu không thấy thì tìm trong thư mục Gameplay
                 robo_path = os.path.join(PROJECT_ROOT, "Images", "Robot_1", "robot_1_full_body.png")
 
             if os.path.exists(robo_path):

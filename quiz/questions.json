@@ -1,29 +1,29 @@
 {
   "robot_1": [
     {
-      "question": "Robot là gì?",
-      "options": ["Đồ ăn", "Máy tự động", "Cây cối", "Thú cưng"],
-      "answer": 1
-    },
-    {
-      "question": "Pin dùng để làm gì?",
-      "options": ["Cung cấp năng lượng", "Trang trí", "Làm mát", "Phát nhạc"],
+      "question": "Bluetooth dùng để...",
+      "options": ["Kết nối không dây", "Nấu nướng", "Làm lạnh", "Cắt giấy"],
       "answer": 0
     },
     {
-      "question": "Bánh xe giúp robot...",
-      "options": ["Bay", "Di chuyển", "Bơi", "Ngủ"],
-      "answer": 1
-    },
-    {
-      "question": "Cảm biến giúp robot...",
-      "options": ["Nhận biết môi trường", "Chạy nhanh", "Đẹp hơn", "Tàng hình"],
+      "question": "Lập trình robot là...",
+      "options": ["Viết lệnh điều khiển", "Vẽ tranh", "Hát", "Chơi thể thao"],
       "answer": 0
     },
     {
-      "question": "Bộ não của robot là...",
-      "options": ["Động cơ", "Mạch điều khiển", "Bánh xe", "Vỏ nhựa"],
-      "answer": 1
+      "question": "AI là viết tắt của...",
+      "options": ["Trí tuệ nhân tạo", "Áo in", "Anh yêu", "Âm ỉ"],
+      "answer": 0
+    },
+    {
+      "question": "Camera robot dùng để...",
+      "options": ["Nhìn/Xử lý ảnh", "Nghe nhạc", "Ngửi mùi", "Nếm vị"],
+      "answer": 0
+    },
+    {
+      "question": "Robot hút bụi là loại robot...",
+      "options": ["Dịch vụ gia đình", "Chiến đấu", "Y tế", "Vũ trụ"],
+      "answer": 0
     }
   ],
   "robot_2": [
@@ -55,29 +55,29 @@
   ],
   "robot_3": [
     {
-      "question": "Bluetooth dùng để...",
-      "options": ["Kết nối không dây", "Nấu nướng", "Làm lạnh", "Cắt giấy"],
+      "question": "Robot là gì?",
+      "options": ["Đồ ăn", "Máy tự động", "Cây cối", "Thú cưng"],
+      "answer": 1
+    },
+    {
+      "question": "Pin dùng để làm gì?",
+      "options": ["Cung cấp năng lượng", "Trang trí", "Làm mát", "Phát nhạc"],
       "answer": 0
     },
     {
-      "question": "Lập trình robot là...",
-      "options": ["Viết lệnh điều khiển", "Vẽ tranh", "Hát", "Chơi thể thao"],
+      "question": "Bánh xe giúp robot...",
+      "options": ["Bay", "Di chuyển", "Bơi", "Ngủ"],
+      "answer": 1
+    },
+    {
+      "question": "Cảm biến giúp robot...",
+      "options": ["Nhận biết môi trường", "Chạy nhanh", "Đẹp hơn", "Tàng hình"],
       "answer": 0
     },
     {
-      "question": "AI là viết tắt của...",
-      "options": ["Trí tuệ nhân tạo", "Áo in", "Anh yêu", "Âm ỉ"],
-      "answer": 0
-    },
-    {
-      "question": "Camera robot dùng để...",
-      "options": ["Nhìn/Xử lý ảnh", "Nghe nhạc", "Ngửi mùi", "Nếm vị"],
-      "answer": 0
-    },
-    {
-      "question": "Robot hút bụi là loại robot...",
-      "options": ["Dịch vụ gia đình", "Chiến đấu", "Y tế", "Vũ trụ"],
-      "answer": 0
+      "question": "Bộ não của robot là...",
+      "options": ["Động cơ", "Mạch điều khiển", "Bánh xe", "Vỏ nhựa"],
+      "answer": 1
     }
   ]
 }
