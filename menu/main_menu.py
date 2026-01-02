@@ -60,9 +60,8 @@ class Menu:
             img = pygame.image.load(path).convert_alpha()
             img = pygame.transform.smoothscale(img, size)
         else:
-            # Tạo hình tạm nếu thiếu ảnh
             img = pygame.Surface(size)
-            img.fill((200, 50, 50)) # Màu đỏ để dễ nhận biết
+            img.fill((200, 50, 50))
         
         rect = img.get_rect(center=(cx + x_off, cy + y_off))
         return img, rect
@@ -112,7 +111,7 @@ class Menu:
             if self.btn_start_rect.collidepoint(event.pos):
                 self.state = "OUTRO"
             elif self.btn_setting_rect.collidepoint(event.pos):
-                self.show_settings = True # Mở bảng setting
+                self.show_settings = True
         return None
 
     def draw(self):
@@ -134,7 +133,7 @@ class Menu:
             self.screen.blit(self.dim_surface, (0, 0))
 
             # 2. Khung bảng
-            panel_rect = pygame.Rect(0, 0, 400, 320) # Tăng chiều cao một chút
+            panel_rect = pygame.Rect(0, 0, 400, 320)
             panel_rect.center = (cx, cy)
             pygame.draw.rect(self.screen, (50, 50, 70), panel_rect, border_radius=20)
             pygame.draw.rect(self.screen, (255, 255, 255), panel_rect, 3, border_radius=20)

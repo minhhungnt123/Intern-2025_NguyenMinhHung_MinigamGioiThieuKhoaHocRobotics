@@ -3,13 +3,10 @@ import sys
 import os
 import json
 import random
-
-# ⭐ THÊM DÒNG NÀY ĐỂ LẤY BIẾN CÀI ĐẶT ÂM THANH
 from config import SOUND_SETTINGS 
 
 WHITE = (255, 255, 255)
 
-# ===== BASE DIR (QUAN TRỌNG) =====
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class QuizManager:
@@ -97,7 +94,7 @@ class QuizManager:
                 "state": "base"
             })
 
-        # ===== SOUND (MP3 – ĐÃ FIX) =====
+        # ===== SOUND =====
         self.snd_correct = None
         self.snd_wrong = None
 
@@ -112,7 +109,6 @@ class QuizManager:
             self.snd_correct.set_volume(0.7)
             self.snd_wrong.set_volume(0.7)
 
-            # Channel riêng để không bị BGM đè
             self.correct_ch = pygame.mixer.Channel(3)
             self.wrong_ch = pygame.mixer.Channel(4)
 

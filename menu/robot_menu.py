@@ -15,12 +15,10 @@ class SpriteAnimation:
             sprite_sheet = pygame.image.load(image_path).convert_alpha()
             sheet_w, sheet_h = sprite_sheet.get_size()
             
-            # ⭐ TÍNH TOÁN CHIỀU RỘNG DỰA TRÊN SỐ FRAME BẠN CUNG CẤP
             if n_frames > 0:
                 frame_width = sheet_w // n_frames
                 
                 for i in range(n_frames):
-                    # Cắt đúng vị trí
                     frame = sprite_sheet.subsurface((i * frame_width, 0, frame_width, sheet_h))
                     scaled = pygame.transform.smoothscale(frame, scale_size)
                     self.frames.append(scaled)
@@ -63,7 +61,7 @@ class RobotSelectMenu:
             {
                 "id": "robot_1",
                 "level_img": "level1.png",
-                "idle_file": "robot_1_idle.png", # File trong Images/Robot_1
+                "idle_file": "robot_1_idle.png",
                 "folder": "Robot_1",
                 "label": "SCOUT",
                 "frames": 12
@@ -71,7 +69,7 @@ class RobotSelectMenu:
             {
                 "id": "robot_2",
                 "level_img": "level2.png",
-                "idle_file": "robot_2_idle.png", # File trong Images/Robot_2
+                "idle_file": "robot_2_idle.png",
                 "folder": "Robot_2",
                 "label": "WELDER",
                 "frames": 9
@@ -79,7 +77,7 @@ class RobotSelectMenu:
             {
                 "id": "robot_3",
                 "level_img": "level3.png",
-                "idle_file": "robot_3_Idle.png", # File trong Images/Robot_3
+                "idle_file": "robot_3_Idle.png",
                 "folder": "Robot_3",
                 "label": "PANACER",
                 "frames": 6
@@ -104,10 +102,10 @@ class RobotSelectMenu:
             else:
                 item["lvl_surf"] = pygame.Surface((150, 90)); item["lvl_surf"].fill((255, 215, 0))
 
-            # 2. ⭐ TẠO ANIMATION IDLE ⭐
+            # 2. TẠO ANIMATION IDLE 
             idle_path = os.path.join(PROJECT_ROOT, "Images", item["folder"], item["idle_file"])
             custom_size = item.get("scale", (180, 180))
-            frame_count = item.get("frames", 1) # Lấy số frame từ config
+            frame_count = item.get("frames", 1)
             
             # Truyền số frame vào class
             item["anim"] = SpriteAnimation(idle_path, custom_size, frame_count)
@@ -147,7 +145,7 @@ class RobotSelectMenu:
             pygame.draw.rect(self.screen, bg_color, draw_rect, border_radius=20)
             pygame.draw.rect(self.screen, border_color, draw_rect, width=3, border_radius=20)
 
-            # ⭐ VẼ ANIMATION FRAME THAY VÌ ẢNH TĨNH ⭐
+            # VẼ ANIMATION FRAME
             r_surf = data["anim"].get_image()
             r_rect = r_surf.get_rect(center=draw_rect.center)
             r_rect.y += 15

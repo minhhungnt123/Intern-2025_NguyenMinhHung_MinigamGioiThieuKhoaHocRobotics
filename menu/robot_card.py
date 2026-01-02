@@ -29,7 +29,7 @@ class RobotCard:
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if self.get_rect().collidepoint(event.pos):
                 self.selected = True
-                self.target_scale = 1.25   # bật mạnh hơn
+                self.target_scale = 1.25
                 return self.robot_id
 
         return None

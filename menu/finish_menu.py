@@ -22,7 +22,7 @@ class FinishMenu:
         self.center_x = SCREEN_WIDTH // 2
         self.center_y = SCREEN_HEIGHT // 2
         
-        # Vị trí đích sau khi trượt (Lệch sang trái)
+        # Vị trí đích sau khi trượt
         self.target_x = 350 
         
         # Rect của hình chúc mừng
@@ -37,24 +37,22 @@ class FinishMenu:
     def _load_assets(self):
         # 1. Hình nền mờ
         self.overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
-        self.overlay.set_alpha(180) # Độ mờ
+        self.overlay.set_alpha(180)
         self.overlay.fill((0, 0, 0))
 
         # 2. Hình Congratulation
         path = os.path.join(PROJECT_ROOT, "Images", "Menu", "congratulation.png")
         if os.path.exists(path):
             img = pygame.image.load(path).convert_alpha()
-            # Scale to khoảng 60% màn hình để còn chỗ cho nút
             self.congrat_img = pygame.transform.smoothscale(img, (600, 450)) 
         else:
             self.congrat_img = pygame.Surface((600, 450))
             self.congrat_img.fill((255, 215, 0))
 
     def _init_buttons(self):
-        # Khu vực bên phải để đặt nút (từ x=700 trở đi)
         start_x = 850
         start_y = 200
-        gap_y = 100 # Khoảng cách giữa các nút
+        gap_y = 100
 
         # Helper load ảnh nút
         def make_btn(name, x, y, tag, scale=(180, 70)):
@@ -97,9 +95,6 @@ class FinishMenu:
 
         # LOGIC ANIMATION
         if self.anim_phase == 0:
-            # Chờ 1 chút (khoảng 60 frame ~ 1 giây) rồi mới trượt
-            # Ở đây mình làm đơn giản: cho trượt luôn hoặc chờ user click
-            # Để tự động trượt:
             self.anim_phase = 1
 
         elif self.anim_phase == 1:
@@ -120,7 +115,7 @@ class FinishMenu:
                 if event.button == 1:
                     for btn in self.buttons:
                         if btn["rect"].collidepoint(event.pos):
-                            return btn["tag"] # Trả về: "robot_1", "restart", "home"...
+                            return btn["tag"]
         return None
 
     def draw(self):

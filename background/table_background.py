@@ -21,8 +21,8 @@ class TableBackground:
         # Thời gian cho parallax
         self.time = 0.0
 
-        # Độ mạnh (NHẸ!)
-        self.amp_x = 5   # px (2–4 là đẹp)
+        # Độ mạnh
+        self.amp_x = 5
         self.amp_y = 2
 
         # Tốc độ

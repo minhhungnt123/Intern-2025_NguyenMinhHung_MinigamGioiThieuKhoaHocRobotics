@@ -30,11 +30,11 @@ if os.path.exists(bgm_path):
         pygame.mixer.music.set_volume(0.5) 
         if SOUND_SETTINGS["bgm_on"]:
             pygame.mixer.music.play(-1)
-        print("♫ Đã load nhạc nền thành công!")
+        print(" Đã load nhạc nền thành công!")
     except Exception as e:
-        print("⚠ Lỗi khi load nhạc:", e)
+        print(" Lỗi khi load nhạc:", e)
 else:
-    print(f"❌ Không tìm thấy file nhạc tại: {bgm_path}")
+    print(f" Không tìm thấy file nhạc tại: {bgm_path}")
 
 # ===== DEFINES STATES =====
 STATE_MAIN_MENU = "main_menu"
@@ -60,7 +60,6 @@ while running:
     clock.tick(FPS)
 
     # ================= EVENT HANDLING =================
-    # Chỉ gọi pygame.event.get() MỘT LẦN duy nhất ở đây
     events = pygame.event.get() 
     for event in events:
         if event.type == pygame.QUIT:
@@ -98,7 +97,7 @@ while running:
                 
             # 2. Về trang chủ (Home)
             elif action == "home":
-                print("🏠 Going Home...")
+                print("Going Home...")
                 state = STATE_MAIN_MENU
                 main_menu.state = "INTRO"
                 main_menu.alpha = 0
@@ -107,9 +106,8 @@ while running:
 
             # 3. MỚI: Chuyển robot từ Menu Chiến Thắng
             elif action in ["robot_1", "robot_2", "robot_3"]:
-                print(f"🚀 Switching to {action}...")
-                selected_robot = action # Cập nhật robot mới
-                # Khởi tạo lại game với robot mới (giữ nguyên nền design_plan cũ)
+                print(f"Switching to {action}...")
+                selected_robot = action
                 gameplay = Gameplay(screen, selected_robot, design_plan)
 
 

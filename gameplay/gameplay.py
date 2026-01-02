@@ -53,9 +53,8 @@ class Gameplay:
         self.zone = AssembleZone()
         self.zone.set_state("body", robot_id)
 
-        # ==========================================
         # 1. LOAD UI ASSETS (CARD & PAUSE)
-        # ==========================================
+
         self.is_paused = False
         
         # Load Card Image
@@ -133,10 +132,9 @@ class Gameplay:
             "robot_3": 2.0
         }
         current_scale = ROBOT_SCALES.get(self.robot_key, 1.0)
+
         # ==========================================
-        # ⭐ THAY ĐỔI: LOGIC VỊ TRÍ CỘT BÊN PHẢI (SIDEBAR)
-        # ==========================================
-        
+
         # 1. Cấu hình khoảng cách
         SIDEBAR_RIGHT_MARGIN = 180
         SIDEBAR_START_Y = 120        
@@ -148,12 +146,11 @@ class Gameplay:
 
         # 2. Vòng lặp tính vị trí
         for index, part_name in enumerate(self.opt_parts):
-            # Tính TÂM (Center) mà chúng ta muốn đặt cả Card và Vật phẩm vào đó
             center_x = SCREEN_WIDTH - SIDEBAR_RIGHT_MARGIN
             center_y = SIDEBAR_START_Y + (index * ITEM_SPACING_Y)
             center_pos = (center_x, center_y)
             
-            # Tạo item (ban đầu nó sẽ bị lệch do DragItem lấy center_pos làm topleft)
+            # Tạo item 
             new_part = DragItem(part_name, center_pos, self.robot_id, scale_factor=current_scale)
             new_part.rect.center = center_pos
             if hasattr(new_part, 'start_pos'):
@@ -242,7 +239,6 @@ class Gameplay:
                 if part.rect.colliderect(self.zone.rect):
                     self.pending_part = part
                     if len(self.questions) == 0:
-                        # Nếu hết câu hỏi, lấy lại từ bản backup
                         self.questions = list(self.backup_questions)
 
                     if len(self.questions) > 0:
