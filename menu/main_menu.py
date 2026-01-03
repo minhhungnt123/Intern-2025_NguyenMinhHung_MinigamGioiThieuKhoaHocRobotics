@@ -2,6 +2,7 @@ import pygame
 import os
 from config import *
 
+
 class Menu:
     def __init__(self, screen):
         self.screen = screen
@@ -15,7 +16,8 @@ class Menu:
             self.bg_image = pygame.image.load(path_bg).convert_alpha()
             self.bg_image = pygame.transform.smoothscale(self.bg_image, self.menu_text_size)
         else:
-            self.bg_image = pygame.Surface(self.menu_text_size); self.bg_image.fill((255, 200, 100))
+            self.bg_image = pygame.Surface(self.menu_text_size)
+            self.bg_image.fill((255, 200, 100))
 
         # Nút Start & Setting
         self.btn_size = (350, 150)
@@ -31,20 +33,30 @@ class Menu:
         except:
             self.font = pygame.font.SysFont("Arial", 32, bold=True)
 
+        # [TỐI ƯU] Pre-render text tĩnh (Chỉ render 1 lần duy nhất)
+        self.txt_title = self.font.render("SETTINGS", True, COLOR_GOLD)
+        self.txt_bgm = self.font.render("BGM", True, COLOR_WHITE)
+        self.txt_sfx = self.font.render("SFX", True, COLOR_WHITE)
+
         # Load ảnh Sound/Mute
         self.icon_on = self._load_icon("sound.png")
         self.icon_off = self._load_icon("mute.png")
 
-        # Vị trí các nút Sound/Music/Close
-        cx, cy = self.width // 2, self.height // 2
-        self.bgm_rect = pygame.Rect(0, 0, 100, 60); self.bgm_rect.center = (cx + 40, cy - 30)
-        self.sfx_rect = pygame.Rect(0, 0, 100, 60); self.sfx_rect.center = (cx + 40, cy + 50)
+        # Load nút Close
         self.btn_close_img, self.btn_close_rect = self._load_img("close_button.png", 0, 130, (140, 70))
+
+        # Vị trí các nút Sound/Music Toggle
+        cx, cy = self.width // 2, self.height // 2
+        self.bgm_rect = pygame.Rect(0, 0, 100, 60)
+        self.bgm_rect.center = (cx + 40, cy - 30)
+        
+        self.sfx_rect = pygame.Rect(0, 0, 100, 60)
+        self.sfx_rect.center = (cx + 40, cy + 50)
 
         # Màn đen mờ che phía sau
         self.dim_surface = pygame.Surface((self.width, self.height))
         self.dim_surface.set_alpha(200)
-        self.dim_surface.fill((0, 0, 0))
+        self.dim_surface.fill(COLOR_BLACK)
 
         # Animation state
         self.state = "INTRO"
@@ -67,6 +79,7 @@ class Menu:
         return img, rect
 
     def _load_icon(self, name):
+        """Hàm hỗ trợ load icon"""
         path = os.path.join(PROJECT_ROOT, "Images", "Menu", name)
         if os.path.exists(path):
             img = pygame.image.load(path).convert_alpha()
@@ -77,10 +90,14 @@ class Menu:
         # Animation Fade In/Out
         if self.state == "INTRO":
             self.alpha += self.fade_speed
-            if self.alpha >= 255: self.alpha = 255; self.state = "ACTIVE"
+            if self.alpha >= 255: 
+                self.alpha = 255
+                self.state = "ACTIVE"
         elif self.state == "OUTRO":
             self.alpha -= self.fade_speed
-            if self.alpha <= 0: self.alpha = 0; return "START_GAME"
+            if self.alpha <= 0: 
+                self.alpha = 0
+                return "START_GAME"
         return None
 
     def handle_event(self, event):
@@ -88,7 +105,7 @@ class Menu:
         if self.show_settings:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 
-                # Nút Close (Kiểm tra va chạm với Rect của ảnh)
+                # Nút Close
                 if self.btn_close_rect.collidepoint(event.pos):
                     self.show_settings = False
                     return None
@@ -115,7 +132,7 @@ class Menu:
         return None
 
     def draw(self):
-        # Vẽ nền và nút menu chính
+        # Vẽ nền và nút menu chính (áp dụng alpha fade)
         self.bg_image.set_alpha(self.alpha)
         self.btn_start_img.set_alpha(self.alpha)
         self.btn_setting_img.set_alpha(self.alpha)
@@ -127,7 +144,7 @@ class Menu:
         self.screen.blit(self.btn_start_img, self.btn_start_rect)
         self.screen.blit(self.btn_setting_img, self.btn_setting_rect)
 
-        # --- VẼ BẢNG SETTING (POPUP) ---
+        # --- VẼ BẢNG SETTING ---
         if self.show_settings:
             # 1. Màn đen mờ
             self.screen.blit(self.dim_surface, (0, 0))
@@ -135,24 +152,22 @@ class Menu:
             # 2. Khung bảng
             panel_rect = pygame.Rect(0, 0, 400, 320)
             panel_rect.center = (cx, cy)
-            pygame.draw.rect(self.screen, (50, 50, 70), panel_rect, border_radius=20)
-            pygame.draw.rect(self.screen, (255, 255, 255), panel_rect, 3, border_radius=20)
+            pygame.draw.rect(self.screen, COLOR_PANEL_BG, panel_rect, border_radius=20)
+            pygame.draw.rect(self.screen, COLOR_PANEL_BORDER, panel_rect, 3, border_radius=20)
 
-            # 3. Tiêu đề
-            title = self.font.render("SETTINGS", True, (255, 215, 0))
-            self.screen.blit(title, title.get_rect(center=(cx, cy - 100)))
+            # 3. Vẽ Text đã Pre-render
+            title_rect = self.txt_title.get_rect(center=(cx, cy - 100))
+            self.screen.blit(self.txt_title, title_rect)
 
-            # 4. Dòng 1: MUSIC (BGM)
-            txt_bgm = self.font.render("BGM", True, (255, 255, 255))
-            self.screen.blit(txt_bgm, (cx - 150, cy - 45))
+            self.screen.blit(self.txt_bgm, (cx - 150, cy - 45))
+            self.screen.blit(self.txt_sfx, (cx - 150, cy + 35))
+
+            # 4. Vẽ Icon trạng thái (On/Off)
             icon_bgm = self.icon_on if SOUND_SETTINGS["bgm_on"] else self.icon_off
             self.screen.blit(icon_bgm, self.bgm_rect)
 
-            # 5. Dòng 2: SOUND (SFX)
-            txt_sfx = self.font.render("SFX", True, (255, 255, 255))
-            self.screen.blit(txt_sfx, (cx - 150, cy + 35))
             icon_sfx = self.icon_on if SOUND_SETTINGS["sfx_on"] else self.icon_off
             self.screen.blit(icon_sfx, self.sfx_rect)
 
-            # 6. Nút Close (Vẽ ảnh thay vì Button class)
+            # 5. Vẽ nút Close
             self.screen.blit(self.btn_close_img, self.btn_close_rect)

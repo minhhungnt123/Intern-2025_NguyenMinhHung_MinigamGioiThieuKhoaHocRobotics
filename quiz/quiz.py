@@ -5,7 +5,6 @@ import json
 import random
 from config import SOUND_SETTINGS 
 
-WHITE = (255, 255, 255)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -13,6 +12,8 @@ class QuizManager:
     def __init__(self, screen_width, screen_height):
         self.sw = screen_width
         self.sh = screen_height
+        self.cached_question_surfs = [] 
+        self.cached_option_surfs = []
 
         # ===== FONT =====
         try:
@@ -42,7 +43,7 @@ class QuizManager:
             center=(self.sw // 2, self.sh // 2)
         )
 
-        # ===== BUTTON =====
+        # ===== BUTTONS =====
         self.buttons = []
         labels = ["A", "B", "C", "D"]
 
@@ -56,13 +57,13 @@ class QuizManager:
             btn_w, btn_h = 200, 50
 
         bx, by = self.board_rect.topleft
-        bw, bh = self.board_rect.size
+        bw_board, bh_board = self.board_rect.size
 
         positions = [
-            (bx + int(bw * 0.18), by + int(bh * 0.48)),
-            (bx + int(bw * 0.52), by + int(bh * 0.48)),
-            (bx + int(bw * 0.18), by + int(bh * 0.68)),
-            (bx + int(bw * 0.52), by + int(bh * 0.68)),
+            (bx + int(bw_board * 0.18), by + int(bh_board * 0.48)),
+            (bx + int(bw_board * 0.52), by + int(bh_board * 0.48)),
+            (bx + int(bw_board * 0.18), by + int(bh_board * 0.68)),
+            (bx + int(bw_board * 0.52), by + int(bh_board * 0.68)),
         ]
 
         for i, label in enumerate(labels):
@@ -97,6 +98,8 @@ class QuizManager:
         # ===== SOUND =====
         self.snd_correct = None
         self.snd_wrong = None
+        self.correct_ch = None
+        self.wrong_ch = None
 
         try:
             self.snd_correct = pygame.mixer.Sound(
@@ -125,23 +128,13 @@ class QuizManager:
         self.fading = False
 
     # =====================================================
-    def start_quiz(self, data):
-        self.question = data
-        self.is_active = True
-        self.result_time = None
-        self.result_value = None
-        self.fade_alpha = 0
-        self.fading = False
-
-        for b in self.buttons:
-            b["state"] = "base"
-            b["hover"] = False
-            b["pressed"] = False
-
+    #  OPTIMIZATION HELPERS
     # =====================================================
-    def _wrap_2_lines(self, text, font, max_w):
+    def _wrap_text_to_surfaces(self, text, font, max_w, color):
+        """Helper: Render text thành danh sách các surface đã wrap (tối đa 2 dòng)"""
         words = text.split()
         lines, cur = [], ""
+        surfaces = []
 
         for w in words:
             test = cur + w + " "
@@ -156,13 +149,49 @@ class QuizManager:
         if len(lines) < 2:
             lines.append(cur)
 
+        # Xử lý cắt bớt nếu dòng quá dài
         while font.size(lines[-1] + "...")[0] > max_w and len(lines[-1]) > 0:
             lines[-1] = lines[-1][:-1]
 
         if lines[-1].strip() != cur.strip():
             lines[-1] = lines[-1].strip() + "..."
 
-        return lines[:2]
+        for line in lines[:2]:
+            surfaces.append(font.render(line, True, color))
+        return surfaces
+
+    # =====================================================
+    def start_quiz(self, data):
+        self.question = data
+        self.is_active = True
+        self.result_time = None
+        self.result_value = None
+        self.fade_alpha = 0
+        self.fading = False
+
+        for b in self.buttons:
+            b["state"] = "base"
+            b["hover"] = False
+            b["pressed"] = False
+
+        # 1. Render Câu hỏi
+        max_w_q = int(self.board_rect.width * 0.75)
+        self.cached_question_surfs = self._wrap_text_to_surfaces(
+            data["question"], self.font_q, max_w_q, WHITE
+        )
+
+        # 2. Render Các đáp án
+        self.cached_option_surfs = []
+        for i, opt_text in enumerate(data["options"]):
+            if i >= len(self.buttons): break
+            
+            btn_rect = self.buttons[i]["rect"]
+            padding = int(btn_rect.width * 0.42)
+            avail_w = btn_rect.width - padding - 20
+            
+            surfs = self._wrap_text_to_surfaces(opt_text, self.font_a, avail_w, WHITE)
+            self.cached_option_surfs.append(surfs)
+        # --------------------------------------------------------
 
     # =====================================================
     def handle_input(self, event):
@@ -189,14 +218,13 @@ class QuizManager:
                 if b["pressed"] and b["hover"] and self.result_time is None:
                     correct = i == self.question["correct_index"]
 
-                    # ===== PLAY SOUND (ĐÃ THÊM LOGIC CHECK SETTING) =====
-                    # Chỉ phát nếu Setting SFX đang BẬT
+                    # ===== PLAY SOUND (KIỂM TRA SETTING) =====
                     if SOUND_SETTINGS["sfx_on"]:
                         if correct and self.snd_correct:
                             self.correct_ch.play(self.snd_correct)
                         elif not correct and self.snd_wrong:
                             self.wrong_ch.play(self.snd_wrong)
-                    # ====================================================
+                    # =========================================
 
                     b["state"] = "correct" if correct else "wrong"
                     if not correct:
@@ -236,28 +264,25 @@ class QuizManager:
         if not self.is_active:
             return
 
+        # 1. Vẽ nền tối
         dark = pygame.Surface((self.sw, self.sh))
         dark.set_alpha(180)
-        dark.fill((0, 0, 0))
+        dark.fill(BLACK)
         screen.blit(dark, (0, 0))
 
+        # 2. Vẽ bảng câu hỏi
         screen.blit(self.board_img, self.board_rect)
 
-        # question
-        max_w = int(self.board_rect.width * 0.75)
-        q_lines = self._wrap_2_lines(
-            self.question["question"], self.font_q, max_w
-        )
+        # 3. Vẽ câu hỏi
         y = self.board_rect.top + int(self.board_rect.height * 0.38)
-
-        for l in q_lines:
-            surf = self.font_q.render(l, True, WHITE)
+        for surf in self.cached_question_surfs:
             rect = surf.get_rect(center=(self.sw // 2, y))
             screen.blit(surf, rect)
             y += 32
 
-        # buttons
+        # 4. Vẽ các nút & đáp án
         for i, b in enumerate(self.buttons):
+            # Chọn hình ảnh nút
             img = b["imgs"]["base"]
             if b["state"] in ("correct", "wrong"):
                 img = b["imgs"][b["state"]]
@@ -268,47 +293,39 @@ class QuizManager:
 
             screen.blit(img, b["rect"])
 
-            if i < len(self.question["options"]):
+            # Vẽ text đáp án
+            if i < len(self.cached_option_surfs):
+                surfs = self.cached_option_surfs[i]
                 padding = int(b["rect"].width * 0.42)
-                avail = b["rect"].width - padding - 20
-                lines = self._wrap_2_lines(
-                    self.question["options"][i], self.font_a, avail
-                )
-
-                ty = b["rect"].centery - (len(lines) * 30) // 2
-                for line in lines:
-                    surf = self.font_a.render(line, True, WHITE)
-                    screen.blit(
-                        surf, (b["rect"].left + padding, ty)
-                    )
+                
+                # Căn giữa text theo chiều dọc trong nút
+                ty = b["rect"].centery - (len(surfs) * 30) // 2
+                
+                for surf in surfs:
+                    screen.blit(surf, (b["rect"].left + padding, ty))
                     ty += 18
 
+        # 5. Hiệu ứng Fade out khi xong
         if self.fading:
             fade = pygame.Surface((self.sw, self.sh))
             fade.set_alpha(self.fade_alpha)
-            fade.fill((0, 0, 0))
+            fade.fill(BLACK)
             screen.blit(fade, (0, 0))
             
     # =====================================================
     def load_question_for_robot(self, robot_id, json_path="questions.json"):
-        """
-        Giữ nguyên UI quiz cũ.
-        Chuyển đổi dữ liệu từ questions.json mới → format cũ.
-        """
+        """Hàm hỗ trợ cũ, giữ lại để tương thích nếu cần gọi trực tiếp"""
         path = os.path.join(BASE_DIR, json_path)
-
-        with open(path, encoding="utf-8") as f:
-            data = json.load(f)
-
-        pool = data.get(robot_id, [])
-        if not pool:
+        try:
+            with open(path, encoding="utf-8") as f:
+                data = json.load(f)
+            pool = data.get(robot_id, [])
+            if not pool: return None
+            raw = random.choice(pool)
+            return {
+                "question": raw["question"],
+                "options": raw["options"],
+                "correct_index": raw["answer"]
+            }
+        except:
             return None
-
-        raw = random.choice(pool)
-
-        # 🔄 ADAPTER: new format → old format
-        return {
-            "question": raw["question"],
-            "options": raw["options"],
-            "correct_index": raw["answer"]
-        }
