@@ -5,12 +5,11 @@ from config import *
 
 class TableBackground:
     def __init__(self):
-        # Load ảnh (phóng to hơn màn hình để còn dịch)
         try:
+            path = os.path.join(PROJECT_ROOT, "Images", "Backgrounds", "table_background.png")
+            
             self.image = pygame.transform.smoothscale(
-                pygame.image.load(
-                    os.path.join("Images", "Backgrounds", "table_background.png")
-                ).convert(),
+                pygame.image.load(path).convert(),
                 (SCREEN_WIDTH + 40, SCREEN_HEIGHT + 40)
             )
         except Exception as e:

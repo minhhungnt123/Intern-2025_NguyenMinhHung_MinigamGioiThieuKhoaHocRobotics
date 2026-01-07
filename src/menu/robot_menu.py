@@ -54,7 +54,7 @@ class RobotSelectMenu:
         self.home_btn_rect = self.home_btn_img.get_rect(topleft=(30, 30))
 
         try:
-            self.label_font = pygame.font.Font(os.path.join(PROJECT_ROOT, "Fonts", "Montserrat-Bold.ttf"), 24)
+            self.label_font = pygame.font.Font(os.path.join(PROJECT_ROOT, "Font", "Montserrat-Bold.ttf"), 24)
         except:
             self.label_font = pygame.font.SysFont("Arial", 24, bold=True)
         self.levels = [

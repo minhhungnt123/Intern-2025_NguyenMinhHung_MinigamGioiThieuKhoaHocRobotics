@@ -17,12 +17,9 @@ class QuizManager:
 
         # ===== FONT =====
         try:
-            self.font_q = pygame.font.Font(
-                os.path.join("Font", "Mitr", "Mitr-Medium.ttf"), 26
-            )
-            self.font_a = pygame.font.Font(
-                os.path.join("Font", "Mitr", "Mitr-Medium.ttf"), 18
-            )
+            path_font = os.path.join(PROJECT_ROOT, "Font", "Mitr", "Mitr-Medium.ttf")
+            self.font_q = pygame.font.Font(path_font, 26)
+            self.font_a = pygame.font.Font(path_font, 18)
         except:
             self.font_q = pygame.font.SysFont("Arial", 26, bold=True)
             self.font_a = pygame.font.SysFont("Arial", 18, bold=True)
@@ -30,7 +27,7 @@ class QuizManager:
         # ===== BOARD =====
         try:
             raw = pygame.image.load(
-                os.path.join("Images", "Board", "board.png")
+                os.path.join(PROJECT_ROOT, "Images", "Board", "board.png")
             ).convert_alpha()
         except:
             raw = pygame.Surface((600, 400))
@@ -49,7 +46,7 @@ class QuizManager:
 
         try:
             temp = pygame.image.load(
-                os.path.join("Images", "Board", "A_base.png")
+                os.path.join(PROJECT_ROOT, "Images", "Board", "A_base.png")
             ).convert_alpha()
             btn_w = int(self.board_rect.width * 0.3)
             btn_h = int(btn_w * temp.get_height() / temp.get_width())
@@ -70,7 +67,7 @@ class QuizManager:
             imgs = {}
             for state in ["base", "hover", "pressed", "correct", "wrong"]:
                 path = os.path.join(
-                    "Images", "Board", f"{label}_{state}.png"
+                    PROJECT_ROOT, "Images", "Board", f"{label}_{state}.png"
                 )
                 try:
                     img = pygame.image.load(path).convert_alpha()
@@ -103,10 +100,10 @@ class QuizManager:
 
         try:
             self.snd_correct = pygame.mixer.Sound(
-                os.path.join("Sound", "correct-choice.mp3")
+                os.path.join(PROJECT_ROOT, "Sound", "correct-choice.mp3")
             )
             self.snd_wrong = pygame.mixer.Sound(
-                os.path.join("Sound", "wrong-choice.mp3")
+                os.path.join(PROJECT_ROOT, "Sound", "wrong-choice.mp3")
             )
 
             self.snd_correct.set_volume(0.7)

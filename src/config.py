@@ -1,6 +1,11 @@
 import os
 
-PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+if os.path.exists(os.path.join(CURRENT_DIR, "Images")):
+    PROJECT_ROOT = CURRENT_DIR
+else:
+    PROJECT_ROOT = os.path.dirname(CURRENT_DIR)
 
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720

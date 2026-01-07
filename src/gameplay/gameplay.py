@@ -56,7 +56,7 @@ class Gameplay:
 
         self.is_paused = False
 
-        # --- HELPER: LOAD ẢNH AN TOÀN ---
+        # --- HELPER: ---
         def _load_image(path_parts, size=None):
             path = os.path.join(PROJECT_ROOT, *path_parts)
             if os.path.exists(path):
@@ -75,7 +75,7 @@ class Gameplay:
         self.preview_card_img = pygame.transform.smoothscale(self.card_img, (200, 200))
 
         # Nút Pause (Góc phải trên)
-        self.pause_img = _load_image(["Images", "Menu", "pause_button.png"], (100, 60))
+        self.pause_img = _load_image([PROJECT_ROOT, "Images", "Menu", "pause_button.png"], (100, 60))
         self.pause_rect = self.pause_img.get_rect(topright=(SCREEN_WIDTH - 20, 20))
 
         # 2. LOAD ROBOT PREVIEW (Góc trái trên)
@@ -95,13 +95,13 @@ class Gameplay:
         # 3. PAUSE MENU (Popup)
         cx, cy = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
         
-        self.btn_restart_img = _load_image(["Images", "Menu", "restart_button.png"], (150, 80))
+        self.btn_restart_img = _load_image([PROJECT_ROOT, "Images", "Menu", "restart_button.png"], (150, 80))
         self.btn_restart_rect = self.btn_restart_img.get_rect(center=(cx - 150, cy))
         
-        self.btn_play_img = _load_image(["Images", "Menu", "play_button.png"], (150, 80))
+        self.btn_play_img = _load_image([PROJECT_ROOT, "Images", "Menu", "play_button.png"], (150, 80))
         self.btn_play_rect = self.btn_play_img.get_rect(center=(cx, cy))
         
-        self.btn_home_img = _load_image(["Images", "Menu", "home.png"], (150, 80))
+        self.btn_home_img = _load_image([PROJECT_ROOT, "Images", "Menu", "home.png"], (150, 80))
         self.btn_home_rect = self.btn_home_img.get_rect(center=(cx + 150, cy))
         
         self.dim_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -179,7 +179,8 @@ class Gameplay:
         self.quiz = QuizManager(SCREEN_WIDTH, SCREEN_HEIGHT)
         self.questions = []
         try:
-            with open("quiz/questions.json", encoding="utf-8") as f:
+            json_path = os.path.join(PROJECT_ROOT, "quiz", "questions.json")
+            with open(json_path, encoding="utf-8") as f:
                 raw_data = json.load(f).get(self.robot_key, [])
         except Exception as e:
             print(f"Lỗi load quiz: {e}")
