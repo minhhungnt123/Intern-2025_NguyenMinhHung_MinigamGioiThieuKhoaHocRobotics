@@ -246,9 +246,8 @@ class Gameplay:
                     self.pending_part = part
                     
                     # Nếu hết câu hỏi thì nạp lại từ backup
-                    if len(self.questions) == 0:
-                        self.questions = list(self.backup_questions)
-
+                    if len(self.questions) > 0:
+                        self.quiz.start_quiz(self.questions[0])
                     # Có câu hỏi -> Hiện Quiz, Không -> Lắp luôn
                     if len(self.questions) > 0:
                         self.quiz.start_quiz(self.questions[0])
