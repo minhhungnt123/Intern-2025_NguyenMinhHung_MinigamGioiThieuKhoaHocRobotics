@@ -3,7 +3,7 @@ import sys
 import os
 import json
 import random
-from config import SOUND_SETTINGS 
+from config import *
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -127,9 +127,8 @@ class QuizManager:
         self.fade_alpha = 0
         self.fading = False
 
-    # =====================================================
     #  OPTIMIZATION HELPERS
-    # =====================================================
+    
     def _wrap_text_to_surfaces(self, text, font, max_w, color):
         """Helper: Render text thành danh sách các surface đã wrap (tối đa 2 dòng)"""
         words = text.split()
@@ -177,7 +176,7 @@ class QuizManager:
         # 1. Render Câu hỏi
         max_w_q = int(self.board_rect.width * 0.75)
         self.cached_question_surfs = self._wrap_text_to_surfaces(
-            data["question"], self.font_q, max_w_q, WHITE
+            data["question"], self.font_q, max_w_q, COLOR_WHITE
         )
 
         # 2. Render Các đáp án
@@ -189,7 +188,7 @@ class QuizManager:
             padding = int(btn_rect.width * 0.42)
             avail_w = btn_rect.width - padding - 20
             
-            surfs = self._wrap_text_to_surfaces(opt_text, self.font_a, avail_w, WHITE)
+            surfs = self._wrap_text_to_surfaces(opt_text, self.font_a, avail_w, COLOR_WHITE)
             self.cached_option_surfs.append(surfs)
         # --------------------------------------------------------
 
@@ -267,7 +266,7 @@ class QuizManager:
         # 1. Vẽ nền tối
         dark = pygame.Surface((self.sw, self.sh))
         dark.set_alpha(180)
-        dark.fill(BLACK)
+        dark.fill(COLOR_BLACK)
         screen.blit(dark, (0, 0))
 
         # 2. Vẽ bảng câu hỏi
@@ -309,7 +308,7 @@ class QuizManager:
         if self.fading:
             fade = pygame.Surface((self.sw, self.sh))
             fade.set_alpha(self.fade_alpha)
-            fade.fill(BLACK)
+            fade.fill(COLOR_BLACK)
             screen.blit(fade, (0, 0))
             
     # =====================================================
